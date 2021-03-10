@@ -1,0 +1,37 @@
+name: MegaApiClient
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: DocFX install
+        uses: crazy-max/ghaction-chocolatey@v1
+        with:
+          args: install docfx -y
+
+      - name: Build,Test,Doc
+        uses: cake-build/cake-action@v1
+        env:
+          MEGAAPICLIENT_PASSWORD: ${{ secrets.MEGAAPICLIENT_PASSWORD }}
+
+      - name: Upload NuGet packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: NuGet packages
+          path: artifacts/**/*.nupkg
+
+      - name: Upload Documentation archive
+        uses: actions/upload-artifact@v2
+        with:
+          name: Documentation archive
+          path: artifacts/docfx.zip
