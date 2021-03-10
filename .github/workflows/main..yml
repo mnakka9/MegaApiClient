@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Full history is required by GitVersion
 
       - name: DocFX install
         uses: crazy-max/ghaction-chocolatey@v1
