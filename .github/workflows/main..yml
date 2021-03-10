@@ -16,13 +16,25 @@ jobs:
         with:
           fetch-depth: 0 # Full history is required by GitVersion
 
-      - name: DocFX install
-        uses: crazy-max/ghaction-chocolatey@v1
-        with:
-          args: install docfx -y
-
-      - name: Build,Test,Doc
+      - name: Clean
         uses: cake-build/cake-action@v1
+        with:
+          target: Clean
+
+      - name: Build
+        uses: cake-build/cake-action@v1
+        with:
+          target: Pack
+
+      - name: Doc
+        uses: cake-build/cake-action@v1
+        with:
+          target: Doc
+
+      - name: Test
+        uses: cake-build/cake-action@v1
+        with:
+          target: Test
         env:
           MEGAAPICLIENT_PASSWORD: ${{ secrets.MEGAAPICLIENT_PASSWORD }}
 

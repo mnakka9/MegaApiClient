@@ -1,10 +1,10 @@
-#tool "nuget:?package=GitVersion.CommandLine&version=5.2.4"
+#tool "nuget:?package=GitVersion.CommandLine&version=5.6.6"
 #tool "nuget:?package=OpenCover&version=4.7.922"
 #tool "nuget:?package=xunit.runner.console&version=2.4.1"
-#tool "nuget:?package=Codecov&version=1.10.0"
-#addin "nuget:?package=Cake.Codecov&version=0.8.0"
-#addin "nuget:?package=Cake.DocFx&version=0.13.1"
-#addin "Cake.Incubator&version=5.1.0"
+#tool "nuget:?package=Codecov&version=1.13.0"
+#tool "nuget:?package=docfx.console&version=2.56.7"
+#addin "nuget:?package=Cake.Codecov&version=1.0.0"
+#addin "Cake.Incubator&version=6.0.0"
 
 var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
@@ -160,8 +160,17 @@ Task("Test")
 Task("Doc")
     .Does(() =>
 {
-    DocFxMetadata("./docs/docfx.json");
-    DocFxBuild("./docs/docfx.json");
+    FilePath docFxPath = Context.Tools.Resolve("docfx.exe");
+    StartProcess(docFxPath, new ProcessSettings {
+        Arguments = new ProcessArgumentBuilder()
+            .Append("metadata")
+            .Append("./docs/docfx.json")
+        });
+    StartProcess(docFxPath, new ProcessSettings {
+        Arguments = new ProcessArgumentBuilder()
+            .Append("build")
+            .Append("./docs/docfx.json")
+        });
 
     var htmldoc_root = "./docs/_site";
     var files = GetFiles(htmldoc_root + "/**/*");
