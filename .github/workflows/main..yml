@@ -11,8 +11,6 @@ jobs:
   build:
     name: Build
     runs-on: windows-latest
-    env:
-      artifactsDirectory: './artifacts/'
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -38,19 +36,38 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Create NuGet package
-        run: dotnet pack --configuration Release --no-restore --no-build --output ${{ env.artifactsDirectory }} -p:PackageVersion=${{ env.GitVersion_NuGetVersionV2 }}
-        if: ${{ startsWith(github.ref, 'refs/tags/v') == false }}
-
-      - name: Create NuGet package with symbols
-        run: dotnet pack --configuration Release --no-restore --no-build --output ${{ env.artifactsDirectory }} --include-symbols -p:PackageVersion=${{ env.GitVersion_NuGetVersionV2 }}
-        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: dotnet pack --configuration Release --no-restore --no-build --output ./artifacts/ -p:PackageVersion=${{ env.GITVERSION_NUGETVERSION }} ${{ INCLUDE_SYMBOLS }}
+        env:
+          INCLUDE_SYMBOLS: "${{ startsWith(github.ref, 'refs/tags/v') == false ? '--include-symbols' : '' }}"
 
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v2
         with:
           name: NuGet packages
-          path: ${{ env.artifactsDirectory }}**/*.nupkg
+          path: ./artifacts/*.nupkg
           if-no-files-found: error
+
+      - name: Upload test binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test binaries
+          path: ./MegaApiClient.Tests/bin/
+          if-no-files-found: error
+
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download test binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: Test binaries
+          path: ./MegaApiClient.Tests/bin/
+
+      - name: Display files
+        run: ls -R
+        working-directory: ./
 
   doc:
     name: Documentation
