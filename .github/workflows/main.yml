@@ -36,9 +36,9 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Create NuGet package
-        run: dotnet pack --configuration Release --no-restore --no-build --output ./artifacts/ -p:PackageVersion=${{ env.GITVERSION_NUGETVERSION }} ${{ INCLUDE_SYMBOLS }}
+        run: dotnet pack --configuration Release --no-restore --no-build --output ./artifacts/ -p:PackageVersion=${{ env.GITVERSION_NUGETVERSION }} ${{ PACK_SYMBOLS }}
         env:
-          INCLUDE_SYMBOLS: "--include-symbols"
+          PACK_SYMBOLS: "--include-symbols"
 
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v2
