@@ -1,4 +1,4 @@
-name: MegaApiClient
+name: MegaApiClient CI
 
 on:
   push:
@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  main:
+  build:
+    name: Build/Test
     runs-on: windows-latest
     steps:
       - name: Check out repository code
@@ -26,26 +27,34 @@ jobs:
         with:
           target: Pack
 
-      - name: Doc
-        uses: cake-build/cake-action@v1
-        with:
-          target: Doc
-
-      - name: Test
-        uses: cake-build/cake-action@v1
-        with:
-          target: Test
-        env:
-          MEGAAPICLIENT_PASSWORD: ${{ secrets.MEGAAPICLIENT_PASSWORD }}
-
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v2
         with:
           name: NuGet packages
           path: artifacts/**/*.nupkg
+          if-no-files-found: error
 
+  doc:
+    name: Documentation
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      #- name: Install NuGet
+      #  uses: nuget/setup-nuget@v1
+
+      - name: Install DocFX
+        run: nuget install docfx.console -Version 2.56.7
+
+      - name: Build documentation
+        run: |
+          ./docfx.console.2.56.7/tools/docfx.exe metadata ./docs/docfx.json
+          ./docfx.console.2.56.7/tools/docfx.exe build ./docs/docfx.json
+          
       - name: Upload Documentation archive
         uses: actions/upload-artifact@v2
         with:
           name: Documentation archive
-          path: artifacts/docfx.zip
+          path: ./docs/_site/
+          if-no-files-found: error
