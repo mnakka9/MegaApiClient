@@ -72,10 +72,10 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Pack
-        run: dotnet pack --configuration Release --no-restore --no-build --output ${{ env.artifactsDirectory }} --package
+      - name: Create NuGet package
+        run: dotnet pack --configuration Release --no-restore --no-build --output ${{ env.artifactsDirectory }}
 
-      - name: Pack with symbols
+      - name: Create NuGet package with symbols
         run: dotnet pack --configuration Release --no-restore --no-build --output ${{ env.artifactsDirectory }} --include-symbols
 
       - name: Upload NuGet packages
