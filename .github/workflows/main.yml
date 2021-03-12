@@ -67,6 +67,10 @@ jobs:
         run: ls -R
         working-directory: ./
 
+      - name: Test
+        run: dotnet test ./MegaApiClient.Tests/bin/Release/netcoreapp2.1/MegaApiClient.Tests.dll --list-tests
+        #run: dotnet test --no-build --verbosity detailled /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+
   doc:
     name: Documentation
     runs-on: windows-latest
