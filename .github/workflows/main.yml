@@ -67,9 +67,6 @@ jobs:
         run: ls -R
         working-directory: ./
 
-      - name: Install Coverlet
-        run: dotnet tool install --global coverlet.console
-
       - name: List tests
         run: dotnet test ./MegaApiClient.Tests/bin/Release/netcoreapp2.1/MegaApiClient.Tests.dll --list-tests
 
