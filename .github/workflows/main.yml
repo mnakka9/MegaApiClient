@@ -74,7 +74,7 @@ jobs:
         run: dotnet test ./MegaApiClient.Tests/bin/Release/netcoreapp2.1/MegaApiClient.Tests.dll --list-tests
 
       - name: Tests
-        run: dotnet test ./MegaApiClient.Tests/bin/Release/netcoreapp2.1/MegaApiClient.Tests.dll /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+        run: dotnet test ./MegaApiClient.Tests/bin/Release/netcoreapp2.1/MegaApiClient.Tests.dll -p:CollectCoverage=true -p:CoverletOutputFormat=opencover
 
   doc:
     name: Documentation
