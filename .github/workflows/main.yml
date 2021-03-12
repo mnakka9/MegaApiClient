@@ -49,27 +49,32 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Test binaries
-          path: ./MegaApiClient.Tests/bin/
+          path: ./MegaApiClient.Tests/
           if-no-files-found: error
 
   test:
     name: Test
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Download test binaries
         uses: actions/download-artifact@v2
         with:
           name: Test binaries
-          path: ./MegaApiClient.Tests/bin/
+          path: ./MegaApiClient.Tests/
 
       - name: Display files
         run: ls -R
         working-directory: ./
 
-      - name: Test
+      - name: Install Coverlet
+        run: dotnet tool install --global coverlet.console
+
+      - name: List tests
         run: dotnet test ./MegaApiClient.Tests/bin/Release/netcoreapp2.1/MegaApiClient.Tests.dll --list-tests
-        #run: dotnet test --no-build --verbosity detailled /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+
+      - name: Tests
+        run: coverlet ./MegaApiClient.Tests/bin/Release/netcoreapp2.1/MegaApiClient.Tests.dll --target "dotnet" --targetargs "test ./MegaApiClient.Tests/ --no-restore --no-build"
 
   doc:
     name: Documentation
