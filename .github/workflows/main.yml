@@ -32,11 +32,8 @@ jobs:
           updateAssemblyInfo: true
           updateAssemblyInfoFilename: './GlobalAssemblyInfo.cs'
 
-      - name: Install dependencies
-        run: dotnet restore
-
       - name: Build
-        run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+        run: dotnet build --configuration ${{ env.CONFIGURATION }}
 
       - name: Create NuGet package
         run: dotnet pack --configuration ${{ env.CONFIGURATION }} --no-restore --no-build --output ./artifacts/ -p:PackageVersion=${{ env.GITVERSION_NUGETVERSION }} --include-symbols
@@ -48,30 +45,19 @@ jobs:
           path: ./artifacts/*.nupkg
           if-no-files-found: error
 
-      - name: Upload test project
-        uses: actions/upload-artifact@v2
-        with:
-          name: Test project
-          path: ./MegaApiClient.Tests/
-          if-no-files-found: error
-
   test:
     name: Test
-    needs: build
     runs-on: windows-latest
     steps:
-      - name: Download test project
-        uses: actions/download-artifact@v2
-        with:
-          name: Test project
-          path: ./MegaApiClient.Tests/
+      - name: Check out repository code
+        uses: actions/checkout@v2
 
       - name: Display files
         run: ls -R
         working-directory: ./
 
       - name: Tests
-        run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-restore --no-build ./MegaApiClient.Tests/ --framework net46 --logger "console;verbosity=detailed" -p:CollectCoverage=true -p:CoverletOutputFormat=opencove
+        run: dotnet test --configuration ${{ env.CONFIGURATION }} ./MegaApiClient.Tests/ --framework net46 --logger "console;verbosity=detailed" -p:CollectCoverage=true -p:CoverletOutputFormat=opencover
         env:
           MEGAAPICLIENT_PASSWORD: ${{ secrets.MEGAAPICLIENT_PASSWORD }}
 
