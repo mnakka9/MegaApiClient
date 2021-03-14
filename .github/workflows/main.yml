@@ -45,34 +45,28 @@ jobs:
           path: ./artifacts/*.nupkg
           if-no-files-found: error
 
-      - name: Upload test project files
-        uses: actions/upload-artifact@v2
-        with:
-          name: Test project
-          path: ./MegaApiClient.Tests/
-          if-no-files-found: error
-
   test:
     name: Test
     timeout-minutes: 120
-    needs: build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Sequential test execution check
         uses: softprops/turnstyle@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download test project files
-        uses: actions/download-artifact@v2
-        with:
-          name: Test project
-          path: ./MegaApiClient.Tests/
+      - name: Check out repository code
+        uses: actions/checkout@v2
 
       - name: Tests
-        run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build ./MegaApiClient.Tests/ --framework net46 --logger "console;verbosity=detailed" -p:CollectCoverage=true -p:CoverletOutputFormat=opencover
+        run: dotnet test --configuration ${{ env.CONFIGURATION }} ./MegaApiClient.Tests/ --framework netcoreapp2.1 --logger "console;verbosity=detailed" -p:CollectCoverage=true -p:CoverletOutputFormat=opencover
         env:
           MEGAAPICLIENT_PASSWORD: ${{ secrets.MEGAAPICLIENT_PASSWORD }}
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          verbose: true
 
       - name: Display files
         run: ls -R
