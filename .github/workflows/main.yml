@@ -12,7 +12,7 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: Build and Pack
     runs-on: windows-latest
     steps:
       - name: Check out repository code
@@ -45,19 +45,32 @@ jobs:
           path: ./artifacts/*.nupkg
           if-no-files-found: error
 
+      - name: Upload test project files
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test project
+          path: ./MegaApiClient.Tests/
+          if-no-files-found: error
+
   test:
     name: Test
+    timeout-minutes: 120
+    needs: build
     runs-on: windows-latest
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
+      - name: Sequential test execution check
+        uses: softprops/turnstyle@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Display files
-        run: ls -R
-        working-directory: ./
+      - name: Download test project files
+        uses: actions/download-artifact@v2
+        with:
+          name: Test project
+          path: ./MegaApiClient.Tests/
 
       - name: Tests
-        run: dotnet test --configuration ${{ env.CONFIGURATION }} ./MegaApiClient.Tests/ --framework net46 --logger "console;verbosity=detailed" -p:CollectCoverage=true -p:CoverletOutputFormat=opencover
+        run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build ./MegaApiClient.Tests/ --framework net46 --logger "console;verbosity=detailed" -p:CollectCoverage=true -p:CoverletOutputFormat=opencover
         env:
           MEGAAPICLIENT_PASSWORD: ${{ secrets.MEGAAPICLIENT_PASSWORD }}
 
